@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
 	<script src="js/zepto.min.js"></script>
-	<!-- <script src="js/jquery-2.2.1.min.js"></script> -->
+	<script src="js/jquery-2.2.1.min.js"></script>
 	<!-- <script src="js/react.js"></script>
     <script src="js/react-dom.js"></script>
     <script src="js/browser.min.js"></script> -->
 	<link href="animate.css" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<style>
-	   blockquote, body, button, dd, dl, dt, fieldset, form, h1, h2, h3, h4, h5, h6, hr, input, legend, li, ol, p, pre, td, textarea, th, ul，img{
+	   blockquote, body, button, dd, dl, dt, fieldset, form, h1, h2, h3, h4, h5, h6, hr, input, legend, li, ol, p, pre, td, textarea, th, ul,img{
 		margin: 0;
 		padding: 0;
 		}
@@ -52,11 +52,14 @@
 
 	  <!-- 搜索区==end -->
 	  <!-- 轮播图区域==start -->
-	  <div id="change-pic" class="box">
-	  		<span><img src="images/7.jpg"></span>
-	  		<span><img src="images/7.jpg"></span>
-	  		<span><img src="images/7.jpg"></span>
-	  		<span><img src="images/7.jpg"></span>
+	  <div id="change-pic">
+		  <ul class="ul">
+		  	<li><img src="images/7.jpg"></li>
+		  	<li><img src="images/8.jpg"></li>
+		  	<li><img src="images/9.jpg"></li>
+		  	<li><img src="images/10.jpg"></li>
+		  </ul>
+		  <div class="change-tab"><ul><li class="active"></li><li></li><li></li><li></li></ul></div>
 	  </div>
 	  <!-- 轮播图区域==end -->
 	  <!-- 商品推荐区域==start -->
@@ -350,11 +353,14 @@
 </div>
 <!-- 搜索页==end -->
   <script type="text/javascript">
-  // 设置相关区域高度适应；布局
+ (function(){
+ 	 // 设置相关区域高度适应；布局
      var changePic=$('#change-pic');
      var changePicImg=$('#change-pic img');
+     changePicImg.width(window.innerWidth);
      var changePicImgHeight=changePicImg.height();
-     changePic.height(changePicImgHeight);
+     // changePic.height(changePicImgHeight);
+     // $('#change-pic span').width(window.innerWidth);
      var search=$('#search');
      var navBar=$('#nav-bar');
      var a=Math.round(window.innerWidth/11.29);
@@ -407,8 +413,9 @@
       $('#log-in .order .iconfont').css('fontSize', d*0.8);
       $('#footer p').height(d);
       $('#footer .iconfont').css('fontSize', d*0.6);
-       $('#footer p').css('lineHeight', d+"px");
+      $('#footer p').css('lineHeight', d+"px");
       // $('#footer').height(integer)
+ })();
   </script>
 <script type="text/javascript">
 (function(){
@@ -440,7 +447,7 @@
  */
 (function(){
 	$('i.return').on('tap', function(event) {
-		event.preventDefault();
+		// event.preventDefault();
 		$('.home').show();
 		$('#nav-bar').show();
 		$('.search-page').hide();
@@ -455,6 +462,71 @@
 		$('#nav-bar').hide();
 	});
 })();
+/*首页轮播图*/
+(function(){
+	// var _w=window.innerWidth;
+	var iNow = 0, index = 1, nStartX = 0;
+    var changePic = document.getElementById('change-pic');
+    // bannerShow();
+    // $(window).resize(function(){
+    //     bannerShow();
+    // });
+
+    changePic.addEventListener('touchstart', function(event) {
+        // event.preventDefault();
+        nStartX = event.targetTouches[0].pageX ;
+    }, false);
+   
+    changePic.addEventListener('touchend', function(event) {
+        // event.preventDefault();
+        var mw = $('#change-pic li').width(); // 获取可视区域宽度
+        var _l = mw + $('#change-pic .ul').position().left%mw; 
+        var _w = mw/2;
+        var _m = $('#change-pic li').length - 1;
+        var ml = $('#change-pic .ul').position().left; //这里要重新获取left值
+        if(_l <=_w){ //中点判断
+            ml = ml - _l
+        }else{
+            ml = ml + (mw - _l)
+        }
+        if(ml >= 0){
+            ml = 0;
+        }else if(ml<= -mw*4){
+        	// alert("wrong");
+        	ml = -mw * 3;
+        }
+        $('#change-pic .ul').animate({'left': ml+"PX"}, 200);
+        var _now = parseInt(-ml/mw);
+        $('.change-tab li').eq(_now).addClass('active').siblings('li').removeClass('active');
+        // $('.change-tab p').html($('#change-pic li').eq(_now).attr('data-t'));
+    }, false);
+   
+    changePic.addEventListener('touchmove', function(event) {
+        event.preventDefault();
+        var touch = event.targetTouches[0];
+        var _l = $('#change-pic .ul').position().left-nStartX+touch.pageX;
+        nStartX = touch.pageX;
+        $('#change-pic .ul').css('left', _l+"px");
+    }, false);
+
+
+//自动切换
+function tabBanner(n){
+    $('#change-pic .ul').animate({'left': -n * $(window).width()});
+    $('.change-tab li').eq(n).addClass('active').siblings('li').removeClass('active');
+    // $('.banner-tab p').html($('.banner-tab li').eq(n).attr('data-title'));
+}
+})();
+
+
+//自适应
+// function bannerShow(){
+//     var _w = $(window).width();
+//     var _h = _w * 0.5
+//     $('.banner-box').height(_h);
+//     $('.banner-show').width(_w * 5);
+//     $('.banner-show li').width(_w);
+// }
 	</script>
   </body>
 </html>
