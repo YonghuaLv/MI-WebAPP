@@ -464,61 +464,147 @@
 })();
 /*首页轮播图*/
 (function(){
-	// var _w=window.innerWidth;
-	var iNow = 0, index = 1, nStartX = 0;
+	var _w=window.innerWidth;
+	var index=0;
+	// var nStartX = 0;
+	var _m = $('.change-tab li').length - 1;
     var changePic = document.getElementById('change-pic');
-    // bannerShow();
-    // $(window).resize(function(){
-    //     bannerShow();
-    // });
-
+    // /*touchstart事件*/
     changePic.addEventListener('touchstart', function(event) {
-        // event.preventDefault();
-        nStartX = event.targetTouches[0].pageX ;
+        event.preventDefault();
+        clearInterval(t);
+
+        var date=new Date();
+        startTime=date.getTime();
+        // console.log(startTime);
+        nEndX = event.targetTouches[0].pageX ;
+        nStartX=nEndX;//定义不同名变量，便于判断触点移动方向；
+        
     }, false);
-   
+   /*touchend事件*/
     changePic.addEventListener('touchend', function(event) {
-        // event.preventDefault();
-        var mw = $('#change-pic li').width(); // 获取可视区域宽度
-        var _l = mw + $('#change-pic .ul').position().left%mw; 
-        var _w = mw/2;
-        var _m = $('#change-pic li').length - 1;
-        var ml = $('#change-pic .ul').position().left; //这里要重新获取left值
-        if(_l <=_w){ //中点判断
-            ml = ml - _l
-        }else{
-            ml = ml + (mw - _l)
-        }
-        if(ml >= 0){
-            ml = 0;
-        }else if(ml<= -mw*4){
-        	// alert("wrong");
-        	ml = -mw * 3;
-        }
-        $('#change-pic .ul').animate({'left': ml+"PX"}, 200);
+        event.preventDefault();
+        t=setInterval(function(){autoChange();},4000);
+        // autoChange();
+        console.log("start");
+        var date=new Date();
+        endTime=date.getTime();
+        var mw = $('#change-pic .ul li').width(); // 获取可视区域宽度
+        var _l = mw + $('#change-pic .ul').position().left%mw; //移动的距离
+        var _w = mw/2;//图片宽度一半
+        var _sw=_w/2;
+        
+        var ml = $('#change-pic .ul').position().left;//这里要重新获取left值
+        /*计算滑动事件的持续时间，小于300过四分之一点变化（点滑效果），大于300过中点变化（拖动滑动）*/
+        if (endTime-startTime>=300) { 
+        	// console.log(endTime-startTime);
+	        if(_l <=_w){ //中点判断
+	            ml = ml - _l
+	        }else{
+	            ml = ml + (mw - _l);
+	             
+                // $("#change-pic .ul").css('left','0px');  
+	        }
+	        if(ml >= -mw){
+	            ml = 0;
+	           
+	        }else if(ml<= -mw*4){
+	        	// alert("wrong");
+	        	ml = -mw * _m;
+	        }
+	    }else{
+	    	if (nStartX>nEndX) {/*页面向右滑动*/
+	    		 // console.log(_l);
+		    	// console.log(endTime-startTime);
+		    	if(_l >=_sw){ //过四分之一点判断
+		            ml = ml - _l
+		        }else{
+		            ml = ml + (mw - _l)
+		        }
+		        if(ml >= 0){
+		            ml = 0;
+		        }else if(ml<= -mw*4){
+		        	// alert("wrong");
+		        	ml = -mw * _m;
+		        }
+		    }else{/*页面向左滑动*/
+		    	// console.log(endTime-startTime);
+		    	if(_l <=_sw){ //过四分之一点判断
+		            ml = ml - _l
+		        }else{
+		        	 // $("#banner ul>li").eq(3).prependTo($("#banner ul"));
+		            ml = ml + (mw - _l)
+		        }
+		        if(ml >=0){
+		            ml = 0;
+		        }else if(ml<= -mw*4){
+		        	// alert("wrong");
+		        	ml = -mw * _m;
+		        }
+		         // $('#change-pic .ul').children().first().remove().clone(true).appendTo($(this)); 
+		    }
+		}
+        $('#change-pic .ul').animate({'left': ml+"px"}, 200);
         var _now = parseInt(-ml/mw);
         $('.change-tab li').eq(_now).addClass('active').siblings('li').removeClass('active');
+        // autoChange();
         // $('.change-tab p').html($('#change-pic li').eq(_now).attr('data-t'));
+        
     }, false);
-   
+
+    /*touchmove事件*/
     changePic.addEventListener('touchmove', function(event) {
         event.preventDefault();
         var touch = event.targetTouches[0];
-        var _l = $('#change-pic .ul').position().left-nStartX+touch.pageX;
-        nStartX = touch.pageX;
+        var _l = $('#change-pic .ul').position().left-nEndX+touch.pageX;//移动距离计算，当前ul left值，减去触摸开始事件时触点位置，加上移动过程中触摸点变化值。
+        nEndX = touch.pageX;
         $('#change-pic .ul').css('left', _l+"px");
+        
     }, false);
+// t=setInterval(function(){autoChange();},4000);
+ $('.change-tab li').on('tap', function(event) {
+ 	// event.preventDefault();
+ 	index=$(this).index();
+ 	$(this).addClass('active').siblings('li').removeClass('active');
+ 	$('#change-pic .ul').stop(true).animate({'left': -_w*index+"px"}, 200);
+ 	/* Act on the event */
+ 	
+ });
 
-
-//自动切换
-function tabBanner(n){
-    $('#change-pic .ul').animate({'left': -n * $(window).width()});
-    $('.change-tab li').eq(n).addClass('active').siblings('li').removeClass('active');
-    // $('.banner-tab p').html($('.banner-tab li').eq(n).attr('data-title'));
+// var count=_now;
+function autoChange(){
+	// var count=1;
+	$('.change-tab li').eq(index).trigger('tap');
+    if (index>=_m){
+		index=0;
+	}else{
+		index++;
+	}
+	console.log(index);
 }
+// setTimeout(function(){autoChange();},4000);
+// console.log(count);
+// autoChange();
+t=setInterval(function(){autoChange();},4000);
+// console.log(count);
+// autoChange();
+// var count=0;
+// $('#change-pic').on('swipeLeft',function() {
+// 	event.preventDefault();
+// 	$('#change-pic .ul').animate({'left':-count* $(window).width()},200);
+// 	if (count>3) {
+// 		count++;
+// 	}else{
+// 		count=0;
+// 	}
+// });
+//自动切换
+// function tabBanner(n){
+//     $('#change-pic .ul').animate({'left': -n * $(window).width()});
+//     $('.change-tab li').eq(n).addClass('active').siblings('li').removeClass('active');
+//     // $('.banner-tab p').html($('.banner-tab li').eq(n).attr('data-title'));
+// }
 })();
-
-
 //自适应
 // function bannerShow(){
 //     var _w = $(window).width();
